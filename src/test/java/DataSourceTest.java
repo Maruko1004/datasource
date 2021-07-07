@@ -55,7 +55,7 @@ public class DataSourceTest {
 
     @Test
     public void executeSqlTest() {
-        ResponseVo responseVo = sqlService.executeSql(null, 1L);
+        ResponseVo responseVo = sqlService.executeSql(null, 1L,null);
         int code = responseVo.getCode();
         System.out.println(code);
         Object data = responseVo.getData();

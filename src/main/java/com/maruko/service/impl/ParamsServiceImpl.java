@@ -7,6 +7,7 @@ import com.maruko.service.ParamsService;
 import com.maruko.utils.JdbcUtil;
 import com.maruko.vo.ResponseVo;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,6 +63,9 @@ public class ParamsServiceImpl implements ParamsService {
     public List<Object> queryParamsInfo(BaseJdbcEntity baseJdbcEntity, Long sqlId) {
         baseJdbcEntity = JdbcUtil.initBaseJdbc(baseJdbcEntity);
         List<Map<String, Object>> mapList = JdbcUtil.executeQuery(baseJdbcEntity, QUERY_BY_SQLID_SQL, Arrays.asList(sqlId));
+        if (CollectionUtils.isEmpty(mapList)) {
+            return null;
+        }
         List<Object> list = new ArrayList<>();
         for (Map<String, Object> map : mapList) {
             list.add(map.get(VALUE).toString());

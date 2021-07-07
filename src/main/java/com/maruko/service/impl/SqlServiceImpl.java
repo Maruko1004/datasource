@@ -60,16 +60,16 @@ public class SqlServiceImpl implements SqlService {
     }
 
     /**
-     * 执行SQL
+     * 执行SQL参数需要在数据库配置
      *
      * @param baseJdbcEntity 初始化数据源
      * @param id             编号
+     * @param params         参数
      * @return
      */
     @Override
-    public ResponseVo executeSql(BaseJdbcEntity baseJdbcEntity, Long id) {
-        baseJdbcEntity = JdbcUtil.initBaseJdbc(baseJdbcEntity);
-        List<Map<String, Object>> list = JdbcUtil.executeQuery(baseJdbcEntity, EXECUTE_SQL, Arrays.asList(id));
+    public ResponseVo executeSql(BaseJdbcEntity baseJdbcEntity, Long id, List<Object> params) {
+        List<Map<String, Object>> list = getResult(baseJdbcEntity, id);
 
         //查询出来的数据只会有一条
         if (!CollectionUtils.isEmpty(list)) {
@@ -79,13 +79,27 @@ public class SqlServiceImpl implements SqlService {
             Long jdbcId = sqlEntity.getJdbcId();
             //根据jdbcId查询jdbc连接信息
             JdbcEntity jdbcEntity = jdbcService.queryJdbcInfo(baseJdbcEntity, jdbcId);
-            //根据id查询参数信息
-            List<Object> paramsEntities = paramsService.queryParamsInfo(baseJdbcEntity, id);
-            List<Map<String, Object>> mapList = JdbcUtil.executeQuery(jdbcEntity, sqlEntity.getSql(), paramsEntities);
+            //根据id查询参数信息 如果有传参 用自己传的参数 没有去数据库查询是否有配置参数
+            if (CollectionUtils.isEmpty(params)) {
+                params = paramsService.queryParamsInfo(baseJdbcEntity, id);
+            }
+            List<Map<String, Object>> mapList = JdbcUtil.executeQuery(jdbcEntity, sqlEntity.getSql(), params);
             return new ResponseVo(RespEnum.SUCCESS, mapList);
         }
 
         return new ResponseVo(RespEnum.SUCCESS);
+    }
+
+    /**
+     * 查询SQL信息
+     *
+     * @param baseJdbcEntity
+     * @param id
+     * @return
+     */
+    public List<Map<String, Object>> getResult(BaseJdbcEntity baseJdbcEntity, Long id) {
+        baseJdbcEntity = JdbcUtil.initBaseJdbc(baseJdbcEntity);
+        return JdbcUtil.executeQuery(baseJdbcEntity, EXECUTE_SQL, Arrays.asList(id));
     }
 
     /**
