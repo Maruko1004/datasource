@@ -1,17 +1,11 @@
-package com.maruko.service.impl;
+package xyc.maruko.service;
 
-import com.maruko.entity.BaseJdbcEntity;
-import com.maruko.entity.JdbcEntity;
-import com.maruko.entity.SqlEntity;
-import com.maruko.enums.RespEnum;
-import com.maruko.service.JdbcService;
-import com.maruko.service.ParamsService;
-import com.maruko.service.SqlService;
-import com.maruko.utils.JdbcUtil;
-import com.maruko.vo.ResponseVo;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
+import xyc.maruko.entity.BaseJdbcEntity;
+import xyc.maruko.entity.JdbcEntity;
+import xyc.maruko.entity.SqlEntity;
+import xyc.maruko.enums.RespEnum;
+import xyc.maruko.utils.JdbcUtil;
+import xyc.maruko.vo.ResponseVo;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,8 +20,8 @@ import java.util.Map;
  * @date 2021/7/7 10:46
  * @since 1.0.0
  */
-@Service
-public class SqlServiceImpl implements SqlService {
+
+public class SqlServiceImpl {
 
     public static final String INSERT_SQL = "INSERT INTO `sql_info`( `jdbc_id`, `sql`) VALUES (?, ?)";
 
@@ -39,12 +33,6 @@ public class SqlServiceImpl implements SqlService {
 
     public static final String SQL = "sql";
 
-    @Autowired
-    private JdbcService jdbcService;
-
-    @Autowired
-    private ParamsService paramsService;
-
     /**
      * 添加sql信息
      *
@@ -52,8 +40,7 @@ public class SqlServiceImpl implements SqlService {
      * @param sqlEntity      SQL实体
      * @return
      */
-    @Override
-    public ResponseVo addSql(BaseJdbcEntity baseJdbcEntity, SqlEntity sqlEntity) {
+    public static ResponseVo addSql(BaseJdbcEntity baseJdbcEntity, SqlEntity sqlEntity) {
         baseJdbcEntity = JdbcUtil.initBaseJdbc(baseJdbcEntity);
         JdbcUtil.executeInsert(baseJdbcEntity, INSERT_SQL, sqlToList(sqlEntity));
         return new ResponseVo(RespEnum.SUCCESS);
@@ -67,21 +54,20 @@ public class SqlServiceImpl implements SqlService {
      * @param params         参数
      * @return
      */
-    @Override
-    public ResponseVo executeSql(BaseJdbcEntity baseJdbcEntity, Long id, List<Object> params) {
+    public static ResponseVo executeSql(BaseJdbcEntity baseJdbcEntity, Long id, List<Object> params) {
         List<Map<String, Object>> list = getResult(baseJdbcEntity, id);
 
         //查询出来的数据只会有一条
-        if (!CollectionUtils.isEmpty(list)) {
+        if (null != list && list.size() > 0) {
             Map<String, Object> map = list.get(0);
             SqlEntity sqlEntity = mapToSqlEntity(map);
             //获取数据库id
             Long jdbcId = sqlEntity.getJdbcId();
             //根据jdbcId查询jdbc连接信息
-            JdbcEntity jdbcEntity = jdbcService.queryJdbcInfo(baseJdbcEntity, jdbcId);
+            JdbcEntity jdbcEntity = JdbcServiceImpl.queryJdbcInfo(baseJdbcEntity, jdbcId);
             //根据id查询参数信息 如果有传参 用自己传的参数 没有去数据库查询是否有配置参数
-            if (CollectionUtils.isEmpty(params)) {
-                params = paramsService.queryParamsInfo(baseJdbcEntity, id);
+            if (null == params || params.size() == 0) {
+                params = ParamsServiceImpl.queryParamsInfo(baseJdbcEntity, id);
             }
             List<Map<String, Object>> mapList = JdbcUtil.executeQuery(jdbcEntity, sqlEntity.getSql(), params);
             return new ResponseVo(RespEnum.SUCCESS, mapList);
@@ -97,7 +83,7 @@ public class SqlServiceImpl implements SqlService {
      * @param id
      * @return
      */
-    public List<Map<String, Object>> getResult(BaseJdbcEntity baseJdbcEntity, Long id) {
+    private static List<Map<String, Object>> getResult(BaseJdbcEntity baseJdbcEntity, Long id) {
         baseJdbcEntity = JdbcUtil.initBaseJdbc(baseJdbcEntity);
         return JdbcUtil.executeQuery(baseJdbcEntity, EXECUTE_SQL, Arrays.asList(id));
     }
@@ -108,7 +94,7 @@ public class SqlServiceImpl implements SqlService {
      * @param map
      * @return
      */
-    private SqlEntity mapToSqlEntity(Map<String, Object> map) {
+    private static SqlEntity mapToSqlEntity(Map<String, Object> map) {
         SqlEntity sqlEntity = new SqlEntity();
         sqlEntity.setId(Long.parseLong(map.get(ID).toString()));
         sqlEntity.setJdbcId(Long.parseLong(map.get(JDBC_ID).toString()));
@@ -122,7 +108,7 @@ public class SqlServiceImpl implements SqlService {
      * @param sqlEntity
      * @return
      */
-    private List<Object> sqlToList(SqlEntity sqlEntity) {
+    private static List<Object> sqlToList(SqlEntity sqlEntity) {
         if (null == sqlEntity) {
             return null;
         }

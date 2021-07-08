@@ -1,4 +1,4 @@
-package com.maruko.enums;
+package xyc.maruko.enums;
 
 /**
  * 〈一句话功能简述〉<br>

@@ -1,6 +1,4 @@
-package com.maruko.service.impl;
-
-import com.maruko.service.InitService;
+package xyc.maruko.service;
 
 /**
  * 〈一句话功能简述〉<br>
@@ -11,5 +9,5 @@ import com.maruko.service.InitService;
  * @since 1.0.0
  */
 
-public class InitServiceImpl implements InitService {
+public class InitServiceImpl  {
 }

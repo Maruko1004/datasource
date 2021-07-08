@@ -1,13 +1,10 @@
-package com.maruko.service.impl;
+package xyc.maruko.service;
 
-import com.maruko.entity.BaseJdbcEntity;
-import com.maruko.entity.JdbcEntity;
-import com.maruko.enums.RespEnum;
-import com.maruko.service.JdbcService;
-import org.springframework.stereotype.Service;
-import com.maruko.utils.JdbcUtil;
-import com.maruko.vo.ResponseVo;
-import org.springframework.util.CollectionUtils;
+import xyc.maruko.entity.BaseJdbcEntity;
+import xyc.maruko.entity.JdbcEntity;
+import xyc.maruko.enums.RespEnum;
+import xyc.maruko.utils.JdbcUtil;
+import xyc.maruko.vo.ResponseVo;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,8 +19,8 @@ import java.util.Map;
  * @date 2021/7/7 10:45
  * @since 1.0.0
  */
-@Service
-public class JdbcServiceImpl implements JdbcService {
+
+public class JdbcServiceImpl {
 
     public static final String INSERT_SQL = "INSERT INTO `jdbc_info`(`drive_class`, `url`, `user_name`, `password`) VALUES (?, ?, ?, ?)";
 
@@ -46,8 +43,7 @@ public class JdbcServiceImpl implements JdbcService {
      * @param jdbcEntity     数据库信息
      * @return
      */
-    @Override
-    public ResponseVo addJdbc(BaseJdbcEntity baseJdbcEntity, JdbcEntity jdbcEntity) {
+    public static ResponseVo addJdbc(BaseJdbcEntity baseJdbcEntity, JdbcEntity jdbcEntity) {
         baseJdbcEntity = JdbcUtil.initBaseJdbc(baseJdbcEntity);
         JdbcUtil.executeInsert(baseJdbcEntity, INSERT_SQL, jdbcToList(jdbcEntity));
         return new ResponseVo(RespEnum.SUCCESS);
@@ -60,16 +56,16 @@ public class JdbcServiceImpl implements JdbcService {
      * @param id
      * @return
      */
-    @Override
-    public JdbcEntity queryJdbcInfo(BaseJdbcEntity baseJdbcEntity, Long id) {
+    public static JdbcEntity queryJdbcInfo(BaseJdbcEntity baseJdbcEntity, Long id) {
         baseJdbcEntity = JdbcUtil.initBaseJdbc(baseJdbcEntity);
         List<Map<String, Object>> mapList = JdbcUtil.executeQuery(baseJdbcEntity, QUERY_BY_ID_SQL, Arrays.asList(id));
-        if (CollectionUtils.isEmpty(mapList)) {
-            return null;
+        if (null != mapList && mapList.size() > 0) {
+            //数据库连接一一对应关系，只取1
+            Map<String, Object> map = mapList.get(0);
+            return mapToJdbcEntity(map);
+
         }
-        //数据库连接一一对应关系，只取1
-        Map<String, Object> map = mapList.get(0);
-        return mapToJdbcEntity(map);
+        return null;
     }
 
     /**
@@ -78,7 +74,7 @@ public class JdbcServiceImpl implements JdbcService {
      * @param map
      * @return
      */
-    private JdbcEntity mapToJdbcEntity(Map<String, Object> map) {
+    private static JdbcEntity mapToJdbcEntity(Map<String, Object> map) {
         JdbcEntity jdbcEntity = new JdbcEntity();
         jdbcEntity.setId(Long.parseLong(map.get(ID).toString()));
         jdbcEntity.setDriverClassType(map.get(DRIVER_CLASS_TYPE).toString());
@@ -94,7 +90,7 @@ public class JdbcServiceImpl implements JdbcService {
      * @param jdbcEntity
      * @return
      */
-    private List<Object> jdbcToList(JdbcEntity jdbcEntity) {
+    private static List<Object> jdbcToList(JdbcEntity jdbcEntity) {
         if (null == jdbcEntity) {
             return null;
         }

@@ -1,10 +1,8 @@
-package com.maruko.utils;
+package xyc.maruko.utils;
 
 
-import com.maruko.config.JdbcConfig;
-import com.maruko.entity.BaseJdbcEntity;
-import com.maruko.entity.JdbcEntity;
-import lombok.extern.slf4j.Slf4j;
+import xyc.maruko.config.JdbcConfig;
+import xyc.maruko.entity.BaseJdbcEntity;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -20,7 +18,6 @@ import java.util.Map;
  * @date 2021/7/6 16:50
  * @since 1.0.0
  */
-@Slf4j
 public class JdbcUtil {
 
     /**
@@ -92,7 +89,7 @@ public class JdbcUtil {
             }
             return list;
         } catch (SQLException e) {
-            log.error("", e);
+
         } finally {
             close(resultSet, preparedStatement, connection);
         }
@@ -138,55 +135,26 @@ public class JdbcUtil {
             try {
                 rs.close();
             } catch (SQLException e) {
-                log.error("sql执行异常", e);
+
             }
         }
         if (st != null) {
             try {
                 st.close();
             } catch (SQLException e) {
-                log.error("sql执行异常", e);
+
             }
         }
         if (conn != null) {
             try {
                 conn.close();
             } catch (SQLException e) {
-                log.error("数据库关闭异常", e);
+
             }
         }
     }
 
     public static void main(String[] args) {
-//        JdbcEntity jdbcEntity1 = new JdbcEntity("MySQL", "jdbc:mysql://localhost:3307/courttax?useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8&allowMultiQueries=true&useSSL=false",
-//                "root", "123456");
-
-        JdbcEntity jdbcEntity2 = new JdbcEntity("Oracle", "jdbc:oracle:thin:@172.16.121.219:1521:ORCL",
-                "nfdp", "123456");
-
-
-        String sql1 = "INSERT INTO \"test2\"(\"name\", \"age\") VALUES (?, ?)";
-        List<Object> params1 = new ArrayList<>();
-        params1.add("maruko");
-        params1.add(18);
-
-
-        String sql2 = "select * from \"test2\" where \"age\"=?";
-        List<Object> params2 = new ArrayList<>();
-        params2.add(18);
-
-
-//        executeInsert(connection1, sql1, params1);
-//        List<Map<String, Object>> mapList1 = executeQuery(connection1, sql2, params2);
-//        for (Map<String, Object> objectMap : mapList1) {
-//            System.out.println(objectMap);
-//        }
-
-        executeInsert(jdbcEntity2, sql1, params1);
-        List<Map<String, Object>> mapList2 = executeQuery(jdbcEntity2, sql2, params2);
-        for (Map<String, Object> objectMap : mapList2) {
-            System.out.println(objectMap);
-        }
 
     }
 }

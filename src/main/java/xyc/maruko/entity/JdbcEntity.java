@@ -1,4 +1,4 @@
-package com.maruko.entity;
+package xyc.maruko.entity;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

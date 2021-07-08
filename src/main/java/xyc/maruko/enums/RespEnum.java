@@ -1,6 +1,6 @@
-package com.maruko.enums;
+package xyc.maruko.enums;
 
-import com.maruko.expection.BusinessException;
+import xyc.maruko.expection.BusinessException;
 
 /**
  * 〈一句话功能简述〉<br>

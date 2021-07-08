@@ -1,13 +1,10 @@
-package com.maruko.service.impl;
+package xyc.maruko.service;
 
-import com.maruko.entity.BaseJdbcEntity;
-import com.maruko.entity.ParamsEntity;
-import com.maruko.enums.RespEnum;
-import com.maruko.service.ParamsService;
-import com.maruko.utils.JdbcUtil;
-import com.maruko.vo.ResponseVo;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
+import xyc.maruko.entity.BaseJdbcEntity;
+import xyc.maruko.entity.ParamsEntity;
+import xyc.maruko.enums.RespEnum;
+import xyc.maruko.utils.JdbcUtil;
+import xyc.maruko.vo.ResponseVo;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,8 +19,8 @@ import java.util.Map;
  * @date 2021/7/7 10:46
  * @since 1.0.0
  */
-@Service
-public class ParamsServiceImpl implements ParamsService {
+
+public class ParamsServiceImpl {
     public static final String INSERT_SQL = "INSERT INTO `params_info`(`sql_id`, `name`, `value`, `type`) VALUES ( ?, ?, ?, ?)";
 
     public static final String ID = "id";
@@ -36,7 +33,7 @@ public class ParamsServiceImpl implements ParamsService {
 
     public static final String TYPE = "type";
 
-    public static final String QUERY_BY_SQLID_SQL = "select * from params_info where sql_id=?";
+    public static final String QUERY_BY_SQL_ID_SQL = "select * from params_info where sql_id=?";
 
     /**
      * 添加参数信息
@@ -45,8 +42,7 @@ public class ParamsServiceImpl implements ParamsService {
      * @param paramsEntity   参数实体
      * @return
      */
-    @Override
-    public ResponseVo addParams(BaseJdbcEntity baseJdbcEntity, ParamsEntity paramsEntity) {
+    public static ResponseVo addParams(BaseJdbcEntity baseJdbcEntity, ParamsEntity paramsEntity) {
         baseJdbcEntity = JdbcUtil.initBaseJdbc(baseJdbcEntity);
         JdbcUtil.executeInsert(baseJdbcEntity, INSERT_SQL, paramsToList(paramsEntity));
         return new ResponseVo(RespEnum.SUCCESS);
@@ -59,11 +55,10 @@ public class ParamsServiceImpl implements ParamsService {
      * @param sqlId
      * @return
      */
-    @Override
-    public List<Object> queryParamsInfo(BaseJdbcEntity baseJdbcEntity, Long sqlId) {
+    public static List<Object> queryParamsInfo(BaseJdbcEntity baseJdbcEntity, Long sqlId) {
         baseJdbcEntity = JdbcUtil.initBaseJdbc(baseJdbcEntity);
-        List<Map<String, Object>> mapList = JdbcUtil.executeQuery(baseJdbcEntity, QUERY_BY_SQLID_SQL, Arrays.asList(sqlId));
-        if (CollectionUtils.isEmpty(mapList)) {
+        List<Map<String, Object>> mapList = JdbcUtil.executeQuery(baseJdbcEntity, QUERY_BY_SQL_ID_SQL, Arrays.asList(sqlId));
+        if (null == mapList || mapList.size() == 0) {
             return null;
         }
         List<Object> list = new ArrayList<>();
@@ -79,7 +74,7 @@ public class ParamsServiceImpl implements ParamsService {
      * @param map
      * @return
      */
-    private ParamsEntity mapToParamsEntity(Map<String, Object> map) {
+    private static ParamsEntity mapToParamsEntity(Map<String, Object> map) {
         ParamsEntity paramsEntity = new ParamsEntity();
         paramsEntity.setId(Long.parseLong(map.get(ID).toString()));
         paramsEntity.setSqlId(Long.parseLong(map.get(SQL_ID).toString()));
@@ -95,7 +90,7 @@ public class ParamsServiceImpl implements ParamsService {
      * @param paramsEntity
      * @return
      */
-    private List<Object> paramsToList(ParamsEntity paramsEntity) {
+    private static List<Object> paramsToList(ParamsEntity paramsEntity) {
         if (null == paramsEntity) {
             return null;
         }

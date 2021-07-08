@@ -1,4 +1,4 @@
-package com.maruko.dto;
+package xyc.maruko.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

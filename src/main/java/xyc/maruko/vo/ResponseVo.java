@@ -1,10 +1,10 @@
-package com.maruko.vo;
+package xyc.maruko.vo;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.maruko.dto.PageBaseDTO;
-import com.maruko.enums.RespEnum;
-import com.maruko.expection.BusinessException;
+import xyc.maruko.dto.PageBaseDTO;
+import xyc.maruko.enums.RespEnum;
+import xyc.maruko.expection.BusinessException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;

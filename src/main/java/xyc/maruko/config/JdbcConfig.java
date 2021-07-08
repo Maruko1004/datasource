@@ -1,13 +1,10 @@
-package com.maruko.config;
+package xyc.maruko.config;
 
 
-import com.maruko.entity.BaseJdbcEntity;
-import com.maruko.enums.JdbcEnum;
 import freemarker.template.utility.ClassUtil;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+import xyc.maruko.entity.BaseJdbcEntity;
+import xyc.maruko.enums.JdbcEnum;
 
-import javax.validation.constraints.NotNull;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.Properties;
@@ -20,8 +17,6 @@ import java.util.Properties;
  * @date 2021/7/6 16:30
  * @since 1.0.0
  */
-@Slf4j
-@Component
 public class JdbcConfig {
 
     /**
@@ -34,7 +29,6 @@ public class JdbcConfig {
             String driverClassType = baseJdbcEntity.getDriverClassType();
             String driverClass = JdbcEnum.getDriverClassByType(driverClassType);
             if (null == driverClass || "".equals(driverClass)) {
-                log.error("暂不支持该数据库驱动");
                 throw new Exception("暂不支持该数据库驱动，请联系管理员");
             }
             ClassUtil.forName(driverClass);
@@ -44,7 +38,7 @@ public class JdbcConfig {
             }};
             return DriverManager.getConnection(baseJdbcEntity.getUrl(), info);
         } catch (Exception e) {
-            log.error("获取数据源连接失败", e);
+
             return null;
         }
     }
