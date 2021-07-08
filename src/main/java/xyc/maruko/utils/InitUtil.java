@@ -1,4 +1,4 @@
-package xyc.maruko.service;
+package xyc.maruko.utils;
 
 /**
  * 〈一句话功能简述〉<br>
@@ -9,5 +9,5 @@ package xyc.maruko.service;
  * @since 1.0.0
  */
 
-public class InitServiceImpl  {
+public class InitUtil {
 }

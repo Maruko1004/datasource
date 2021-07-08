@@ -1,160 +1,102 @@
 package xyc.maruko.utils;
 
-
-import xyc.maruko.config.JdbcConfig;
 import xyc.maruko.entity.BaseJdbcEntity;
+import xyc.maruko.entity.JdbcEntity;
+import xyc.maruko.enums.RespEnum;
+import xyc.maruko.vo.ResponseVo;
 
-import java.sql.*;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 /**
  * 〈一句话功能简述〉<br>
- * 〈数据库增删查改〉
+ * 〈数据库信息录入实现层〉
  *
  * @author maruko
- * @date 2021/7/6 16:50
+ * @date 2021/7/7 10:45
  * @since 1.0.0
  */
+
 public class JdbcUtil {
 
-    /**
-     * 初始化数据库配置
-     *
-     * @param baseJdbcEntity
-     * @return
-     */
-    public static BaseJdbcEntity initBaseJdbc(BaseJdbcEntity baseJdbcEntity) {
-        if (null == baseJdbcEntity) {
-            return new BaseJdbcEntity("MySQL", "jdbc:mysql://localhost:3307/maruko?useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8&allowMultiQueries=true&useSSL=false",
-                    "root", "123456");
-        }
-        return baseJdbcEntity;
-    }
+    private static final String INSERT_SQL = "INSERT INTO `jdbc_info`(`drive_class`, `url`, `user_name`, `password`) VALUES (?, ?, ?, ?)";
 
+    private static final String QUERY_BY_ID_SQL = "select * from jdbc_info where id=?";
+
+    private static final String ID = "id";
+
+    private static final String DRIVER_CLASS_TYPE = "drive_class";
+
+    private static final String URL = "url";
+
+    private static final String USER_NAME = "user_name";
+
+    private static final String PASSWORD = "password";
 
     /**
-     * 执行SQL
+     * 添加jdbc连接信息
      *
-     * @param connection
-     * @param sql
-     * @param params
-     * @throws Exception
+     * @param baseJdbcEntity 初始化数据源
+     * @param jdbcEntity     数据库信息
+     * @return ResponseVo
      */
-    public static PreparedStatement prepareStatement(Connection connection, String sql, List<Object> params) throws SQLException {
-        PreparedStatement preparedStatement = connection.prepareStatement(sql);
-        if (null != params && params.size() > 0) {
-            for (int i = 0; i < params.size(); i++) {
-                preparedStatement.setObject(i + 1, params.get(i));
-            }
-        }
-        return preparedStatement;
+    public static ResponseVo addJdbc(BaseJdbcEntity baseJdbcEntity, JdbcEntity jdbcEntity) {
+        baseJdbcEntity = BaseJdbcUtil.initBaseJdbc(baseJdbcEntity);
+        BaseJdbcUtil.executeInsert(baseJdbcEntity, INSERT_SQL, jdbcToList(jdbcEntity));
+        return new ResponseVo(RespEnum.SUCCESS);
     }
 
     /**
-     * 条件查询
+     * 根据id查询数据库信息
      *
-     * @param jdbcEntity
-     * @param sql
-     * @param params
-     * @return
+     * @param baseJdbcEntity 初始化数据源
+     * @param id             编号
+     * @return JdbcEntity
      */
-    public static List<Map<String, Object>> executeQuery(BaseJdbcEntity jdbcEntity, String sql,
-                                                         List<Object> params) {
-        List<Map<String, Object>> list = new ArrayList<>();
-
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-
-        try {
-            connection = JdbcConfig.getConnection(jdbcEntity);
-            preparedStatement = prepareStatement(connection, sql, params);
-            resultSet = preparedStatement.executeQuery();
-            ResultSetMetaData metaData = resultSet.getMetaData();
-            int colsLen = metaData.getColumnCount();
-            while (resultSet.next()) {
-                Map<String, Object> map = new HashMap<>();
-                for (int i = 0; i < colsLen; i++) {
-                    String colsName = metaData.getColumnName(i + 1);
-                    Object colsValue = resultSet.getObject(colsName);
-                    if (colsValue == null) {
-                        colsValue = "";
-                    }
-                    map.put(colsName, colsValue);
-                }
-                list.add(map);
-            }
-            return list;
-        } catch (SQLException e) {
-
-        } finally {
-            close(resultSet, preparedStatement, connection);
+    protected static JdbcEntity queryJdbcInfo(BaseJdbcEntity baseJdbcEntity, Long id) {
+        baseJdbcEntity = BaseJdbcUtil.initBaseJdbc(baseJdbcEntity);
+        List<Map<String, Object>> mapList = BaseJdbcUtil.executeQuery(baseJdbcEntity, QUERY_BY_ID_SQL, Collections.singletonList(id));
+        if (null != mapList && mapList.size() > 0) {
+            //数据库连接一一对应关系，只取1
+            Map<String, Object> map = mapList.get(0);
+            return mapToJdbcEntity(map);
         }
         return null;
     }
 
     /**
-     * 条件插入
+     * 将map转换为JdbcEntity
      *
-     * @param jdbcEntity
-     * @param sql
-     * @param params
-     * @return
+     * @param map map
+     * @return JdbcEntity
      */
-    public static int executeInsert(BaseJdbcEntity jdbcEntity, String sql,
-                                    List<Object> params) {
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-
-        try {
-            connection = JdbcConfig.getConnection(jdbcEntity);
-            preparedStatement = prepareStatement(connection, sql, params);
-            //设置自动提交为true
-            connection.setAutoCommit(true);
-            return preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return 0;
-        } finally {
-            close(null, preparedStatement, connection);
-        }
+    private static JdbcEntity mapToJdbcEntity(Map<String, Object> map) {
+        JdbcEntity jdbcEntity = new JdbcEntity();
+        jdbcEntity.setId(Long.parseLong(map.get(ID).toString()));
+        jdbcEntity.setDriverClassType(map.get(DRIVER_CLASS_TYPE).toString());
+        jdbcEntity.setUrl(map.get(URL).toString());
+        jdbcEntity.setUserName(map.get(USER_NAME).toString());
+        jdbcEntity.setPassword(map.get(PASSWORD).toString());
+        return jdbcEntity;
     }
 
     /**
-     * 释放资源
+     * 将实体转换为list
      *
-     * @param rs
-     * @param st
-     * @param conn
+     * @param jdbcEntity 数据库实体
+     * @return List<Object>
      */
-    public static void close(ResultSet rs, Statement st, Connection conn) {
-        if (rs != null) {
-            try {
-                rs.close();
-            } catch (SQLException e) {
-
-            }
+    private static List<Object> jdbcToList(JdbcEntity jdbcEntity) {
+        if (null == jdbcEntity) {
+            return null;
         }
-        if (st != null) {
-            try {
-                st.close();
-            } catch (SQLException e) {
-
-            }
-        }
-        if (conn != null) {
-            try {
-                conn.close();
-            } catch (SQLException e) {
-
-            }
-        }
-    }
-
-    public static void main(String[] args) {
-
+        List<Object> list = new ArrayList<>();
+        list.add(jdbcEntity.getDriverClassType());
+        list.add(jdbcEntity.getUrl());
+        list.add(jdbcEntity.getUserName());
+        list.add(jdbcEntity.getPassword());
+        return list;
     }
 }

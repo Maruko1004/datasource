@@ -4,6 +4,7 @@ package xyc.maruko.config;
 import freemarker.template.utility.ClassUtil;
 import xyc.maruko.entity.BaseJdbcEntity;
 import xyc.maruko.enums.JdbcEnum;
+import xyc.maruko.expection.BusinessException;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -21,7 +22,7 @@ public class JdbcConfig {
 
     /**
      * @param baseJdbcEntity 数据库配置信息
-     * @return
+     * @return Connection
      */
     public static Connection getConnection(BaseJdbcEntity baseJdbcEntity) {
         try {
@@ -29,7 +30,7 @@ public class JdbcConfig {
             String driverClassType = baseJdbcEntity.getDriverClassType();
             String driverClass = JdbcEnum.getDriverClassByType(driverClassType);
             if (null == driverClass || "".equals(driverClass)) {
-                throw new Exception("暂不支持该数据库驱动，请联系管理员");
+                throw new BusinessException("暂不支持该数据库驱动，请联系管理员");
             }
             ClassUtil.forName(driverClass);
             Properties info = new Properties() {{
@@ -38,8 +39,7 @@ public class JdbcConfig {
             }};
             return DriverManager.getConnection(baseJdbcEntity.getUrl(), info);
         } catch (Exception e) {
-
-            return null;
+            throw new BusinessException("数据库连接失败，账号或密码错误");
         }
     }
 }
